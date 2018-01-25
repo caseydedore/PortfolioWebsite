@@ -80,3 +80,20 @@ hr {
     height:6px;
     margin:0px;
 }
+
+.content-item {
+    clear:both;
+    width:100%;
+    margin-bottom:20px;
+}
+
+.content-image {
+    min-width:250px;
+    margin-right:10px;
+    margin-bottom:10px;
+}
+
+.content-item h3 {
+    font-size:x-large;
+    margin-top:0px;
+}
