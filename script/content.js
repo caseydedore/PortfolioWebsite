@@ -1,10 +1,11 @@
 $(function () {
-    var itemsToDisplay = dataAccess.getContentItems();
-    contentBuilder.setItemParent($(".content"));
-    contentBuilder.setItemTemplate($("#template-content-item"));
-    contentBuilder.setItemImageTemplate($("#template-content-item-image"));
-    $.each(itemsToDisplay, function (index, value) {
-        contentBuilder.addItemToPage(value);
+    dataAccess.getContentItems().pipe(function (items) {
+        contentBuilder.setItemParent($(".content"));
+        contentBuilder.setItemTemplate($("#template-content-item"));
+        contentBuilder.setItemImageTemplate($("#template-content-item-image"));
+        $.each(items, function (index, item) {
+            contentBuilder.addItemToPage(item);
+        });
     });
 });
 
@@ -51,22 +52,51 @@ var contentBuilder = function () {
 
 var dataAccess = function () {
     var getContent = function () {
-        var items = [];
-        var item = new this.ContentItem();
-        item.title = "test";
-        item.description = "description goes here";
-        item.images = ["data/content/image/checkerboard.png", "data/content/image/checkerboard.png", "data/content/image/checkerboard.png"];
-        items.push(item);
-        return items;
+        var $promise = $.Deferred();
+        getContentFiles()
+            .pipe(getContentItemsForList)
+            .pipe(function (items) {
+                $promise.resolve(items);
+            })
+        return $promise.promise();
     };
 
-    var jsonToItem = function () {
-
-    };
-
-    var jsonToList = function () {
-
-    };
+    var getContentFiles = function () {
+        var $promise = $.Deferred();
+        $.ajax({
+            url: "./data/content.json"
+        }).done(function (content) {
+            $promise.resolve(content.files);
+        });
+        return $promise.promise();
+    }
+    
+    var getContentItemsForList = function (list) {
+        var promises = [];
+        var contentItems = [];
+        var $promise = $.Deferred();
+        var contentItem = null;
+        $.each(list, function (index, file) {
+            var $ajaxPromise = $.Deferred();
+            promises.push($ajaxPromise.promise());
+            $.ajax({
+                url: "./data/content/" + file
+            }).done(function (item) {
+                contentItem = new dataAccess.ContentItem();
+                contentItem.title = item.title;
+                contentItem.description = item.description;
+                $.each(item.images, function (index, image) {
+                    contentItem.images.push("./data/content/image/" + image);
+                });
+                contentItems.push(contentItem);
+                $ajaxPromise.resolve();
+            });
+        });
+        $.when.apply(null, promises).done(function(){
+            $promise.resolve(contentItems);
+        });
+        return $promise.promise();
+    }
 
     var item = function () {
         this.title = "";
