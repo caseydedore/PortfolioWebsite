@@ -14,10 +14,9 @@ var contentBuilder = function () {
 
     var addItem = function (contentItem) {
         var clone = $template.prop("content").cloneNode(isDeepCopy);
-        var $newItem = $(clone);
-        $newItem.find("h3").val(contentItem.title);
-        $newItem.find("p").val(contentItem.description);
-        $newItem.appendTo($parent);
+        clone.querySelector("h3").innerText = contentItem.title;
+        clone.querySelector("p").innerText = contentItem.description;
+        $parent.append(clone);
     };
 
     var setTemplate = function ($itemTemplate) {
