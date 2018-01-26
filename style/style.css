@@ -89,14 +89,26 @@ hr {
 
 .content-image {
     min-width:250px;
+    max-width:30%;
     margin:10px;
     margin-top:0px;
     margin-bottom:20px;
     display:inline-block;
     float:left;
+    border:1px dashed white;
+    cursor:pointer;
+}
+
+.content-image-large {
+    max-width:96% !important;
+    border:3px dashed greenyellow;
 }
 
 .content-item h3 {
-    font-size:x-large;
+    font-size:20pt;
     margin-top:0px;
+}
+
+.content-item p {
+    font-size:13pt;
 }
