@@ -89,8 +89,11 @@ hr {
 
 .content-image {
     min-width:250px;
-    margin-right:10px;
-    margin-bottom:10px;
+    margin:10px;
+    margin-top:0px;
+    margin-bottom:20px;
+    display:inline-block;
+    float:left;
 }
 
 .content-item h3 {
