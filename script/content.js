@@ -3,10 +3,22 @@ $(function () {
         contentBuilder.setItemParent($(".content"));
         contentBuilder.setItemTemplate($("#template-content-item"));
         contentBuilder.setItemImageTemplate($("#template-content-item-image"));
+        var imageLoadPromises = [];
         $.each(items, function (index, item) {
-            contentBuilder.addItemToPage(item);
+            var promise = contentBuilder.addItemToPage(item);
+            imageLoadPromises.push(promise);
+        });
+        $.when.apply(null, imageLoadPromises).done(function () {
+            initContainerLayout();
         });
     });
+
+    var initContainerLayout = function () {
+        $('.container-content-image').masonry({
+            itemSelector: '.content-image',
+            stagger: 10
+        });
+    }
 });
 
 var contentBuilder = function () {
@@ -16,18 +28,27 @@ var contentBuilder = function () {
     var isDeepCopy = true;
 
     var addItem = function (contentItem) {
+        var $promise = $.Deferred();
+        var promises = [];
         var clone = $template.prop("content").cloneNode(isDeepCopy);
         clone.querySelector("h3").innerText = contentItem.title;
         clone.querySelector("p").innerText = contentItem.description;
-        if (contentItem.images.length > 0) {
-            var imageClone = null;
-            $.each(contentItem.images, function(index, value){
-                imageClone = $templateImage.prop("content").cloneNode(isDeepCopy);
-                imageClone.querySelector("img").setAttribute("src", value);
-                clone.querySelector(".container-content-image").append(imageClone);
-            });
-        }
+        var imageClone = null;
+        $.each(contentItem.images, function (index, value) {
+            var $imageLoadPromise = $.Deferred();
+            promises.push($imageLoadPromise);
+            imageClone = $templateImage.prop("content").cloneNode(isDeepCopy);
+            imageClone.querySelector("img").onload = function () {
+                $imageLoadPromise.resolve();
+            };
+            imageClone.querySelector("img").setAttribute("src", value);
+            clone.querySelector(".container-content-image").append(imageClone);
+        });
         $parent.append(clone);
+        $.when.apply(null, promises).done(function () {
+            $promise.resolve();
+        });
+        return $promise.promise();
     };
 
     var setTemplate = function ($itemTemplate) {
@@ -70,7 +91,7 @@ var dataAccess = function () {
         });
         return $promise.promise();
     }
-    
+
     var getContentItemsForList = function (list) {
         var promises = [];
         var contentItems = [];
@@ -92,7 +113,7 @@ var dataAccess = function () {
                 $ajaxPromise.resolve();
             });
         });
-        $.when.apply(null, promises).done(function(){
+        $.when.apply(null, promises).done(function () {
             $promise.resolve(contentItems);
         });
         return $promise.promise();
@@ -107,7 +128,7 @@ var dataAccess = function () {
     var list = function () {
         this.files = [];
     };
-    
+
     return {
         getContentItems: getContent,
         ContentItem: item,
