@@ -50,17 +50,7 @@ var contentBuilder = function () {
         var clone = $template.prop("content").cloneNode(isDeepCopy);
         clone.querySelector("h3").innerText = contentItem.title;
         clone.querySelector("p").innerText = contentItem.description;
-        var imageClone = null;
-        $.each(contentItem.images, function (index, value) {
-            var $imageLoadPromise = $.Deferred();
-            promises.push($imageLoadPromise);
-            imageClone = $templateImage.prop("content").cloneNode(isDeepCopy);
-            imageClone.querySelector("img").onload = function () {
-                $imageLoadPromise.resolve();
-            };
-            imageClone.querySelector("img").setAttribute("src", value);
-            clone.querySelector(selectorImageContainer).append(imageClone);
-        });
+        promises = addImageSectionAsync(clone, contentItem.images);
         addDownloadSection(clone, contentItem.downloads);
         $parent.append(clone);
         $.when.apply(null, promises).done(function () {
@@ -68,6 +58,22 @@ var contentBuilder = function () {
         });
         return $promise.promise();
     };
+
+    var addImageSectionAsync = function (itemClone, images) {
+        var promises = [];
+        var imageClone = null;
+        $.each(images, function (index, value) {
+            var $imageLoadPromise = $.Deferred();
+            promises.push($imageLoadPromise);
+            imageClone = $templateImage.prop("content").cloneNode(isDeepCopy);
+            imageClone.querySelector("img").onload = function () {
+                $imageLoadPromise.resolve();
+            };
+            imageClone.querySelector("img").setAttribute("src", value);
+            itemClone.querySelector(selectorImageContainer).append(imageClone);
+        });
+        return promises;
+    }
 
     var addDownloadSection = function (itemClone, downloads) {
         var downloadClone = null;
