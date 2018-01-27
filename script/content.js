@@ -23,7 +23,8 @@ $(function () {
     var initContainerLayout = function () {
         $imageContainer.masonry({
             itemSelector: '.content-image',
-            stagger: 10
+            stagger: 10,
+            columnWidth: 32
         });
     }
 
