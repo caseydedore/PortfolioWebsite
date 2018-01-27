@@ -4,5 +4,11 @@
   "images": [
     "checkerboard.png",
     "checkerboard-wide.png"
+  ],
+  "downloads": [
+    {
+      "title": "Checkerboard image",
+      "resource":  "checkerboard.png"
+    }
   ]
 }
