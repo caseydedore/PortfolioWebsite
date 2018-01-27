@@ -3,7 +3,11 @@ $(function () {
     dataAccess.getContentItems().pipe(function (items) {
         contentBuilder.setItemParent($(".content"));
         contentBuilder.setItemTemplate($("#template-content-item"));
+        contentBuilder.setItemImageContainerSelector(".container-content-image");
         contentBuilder.setItemImageTemplate($("#template-content-item-image"));
+        contentBuilder.setItemDownloadContainerSelector(".container-content-download");
+        contentBuilder.setItemDownloadTemplate($("#template-content-item-download"));
+
         var imageLoadPromises = [];
         $.each(items, function (index, item) {
             var promise = contentBuilder.addItemToPage(item);
@@ -33,7 +37,10 @@ $(function () {
 
 var contentBuilder = function () {
     var $template = null;
+    var selectorImageContainer = "";
     var $templateImage = null;
+    var selectorDownloadContainer = "";
+    var $templateDownload = null;
     var $parent = null;
     var isDeepCopy = true;
 
@@ -52,8 +59,9 @@ var contentBuilder = function () {
                 $imageLoadPromise.resolve();
             };
             imageClone.querySelector("img").setAttribute("src", value);
-            clone.querySelector(".container-content-image").append(imageClone);
+            clone.querySelector(selectorImageContainer).append(imageClone);
         });
+        addDownloadSection(clone, contentItem.downloads);
         $parent.append(clone);
         $.when.apply(null, promises).done(function () {
             $promise.resolve();
@@ -61,12 +69,37 @@ var contentBuilder = function () {
         return $promise.promise();
     };
 
+    var addDownloadSection = function (itemClone, downloads) {
+        var downloadClone = null;
+        $.each(downloads, function (index, download) {
+            downloadClone = $templateDownload.prop("content").cloneNode(isDeepCopy);
+            downloadClone.querySelector("a").setAttribute("href", download.resource);
+            downloadClone.querySelector("a").innerText = download.title;
+            itemClone.querySelector(selectorDownloadContainer).append(downloadClone);
+        });
+        if (downloads.length <= 0) {
+            $(itemClone.querySelector(selectorDownloadContainer)).hide();
+        }
+    }
+
     var setTemplate = function ($itemTemplate) {
         $template = $itemTemplate;
     };
 
+    var setImageContainerSelector = function (selector) {
+        selectorImageContainer = selector;
+    }
+
     var setImageTemplate = function ($imageTemplate) {
         $templateImage = $imageTemplate;
+    }
+
+    var setDownloadContainerSelector = function (selector) {
+        selectorDownloadContainer = selector;
+    }
+
+    var setDownloadTemplate = function ($template) {
+        $templateDownload = $template;
     }
 
     var setParent = function ($itemParent) {
@@ -76,7 +109,10 @@ var contentBuilder = function () {
     return {
         addItemToPage: addItem,
         setItemTemplate: setTemplate,
+        setItemImageContainerSelector: setImageContainerSelector,
         setItemImageTemplate: setImageTemplate,
+        setItemDownloadContainerSelector: setDownloadContainerSelector,
+        setItemDownloadTemplate: setDownloadTemplate,
         setItemParent: setParent
     };
 }();
@@ -107,6 +143,7 @@ var dataAccess = function () {
         var contentItems = [];
         var $promise = $.Deferred();
         var contentItem = null;
+        var resource = null;
         $.each(list, function (index, file) {
             var $ajaxPromise = $.Deferred();
             promises.push($ajaxPromise.promise());
@@ -118,6 +155,12 @@ var dataAccess = function () {
                 contentItem.description = item.description;
                 $.each(item.images, function (index, image) {
                     contentItem.images.push("./data/content/image/" + image);
+                });
+                $.each(item.downloads, function (index, download) {
+                    resource = new dataAccess.Resource();
+                    resource.title = download.title;
+                    resource.resource = "./data/content/download/" + download.resource;
+                    contentItem.downloads.push(resource);
                 });
                 contentItems.push(contentItem);
                 $ajaxPromise.resolve();
@@ -133,15 +176,22 @@ var dataAccess = function () {
         this.title = "";
         this.description = "";
         this.images = [];
+        this.downloads = [];
     };
 
     var list = function () {
         this.files = [];
     };
 
+    var resource = function () {
+        this.title = "";
+        this.resource = "";
+    };
+
     return {
         getContentItems: getContent,
         ContentItem: item,
-        Content: list
+        Content: list,
+        Resource: resource
     };
 }();

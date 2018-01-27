@@ -104,6 +104,14 @@ hr {
     border:3px dashed greenyellow;
 }
 
+.container-content-download {
+    margin-bottom:10px;
+}
+
+.container-content-download * {
+    display:inline;
+}
+
 .content-item h3 {
     font-size:20pt;
     margin-top:0px;
