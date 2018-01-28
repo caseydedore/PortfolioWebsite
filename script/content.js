@@ -5,6 +5,8 @@ $(function () {
         contentBuilder.setItemTemplate($("#template-content-item"));
         contentBuilder.setItemImageContainerSelector(".container-content-image");
         contentBuilder.setItemImageTemplate($("#template-content-item-image"));
+        contentBuilder.setItemResourceContainerSelector(".container-content-resource");
+        contentBuilder.setItemResourceTemplate($("#template-content-item-resource"));
         contentBuilder.setItemDownloadContainerSelector(".container-content-download");
         contentBuilder.setItemDownloadTemplate($("#template-content-item-download"));
 
@@ -40,6 +42,8 @@ var contentBuilder = function () {
     var $template = null;
     var selectorImageContainer = "";
     var $templateImage = null;
+    var selectorResourceContainer = "";
+    var $templateResource = null;
     var selectorDownloadContainer = "";
     var $templateDownload = null;
     var $parent = null;
@@ -52,6 +56,7 @@ var contentBuilder = function () {
         clone.querySelector("h3").innerText = contentItem.title;
         clone.querySelector("p").innerText = contentItem.description;
         promises = addImageSectionAsync(clone, contentItem.images);
+        addResourceSection(clone, contentItem.resources);
         addDownloadSection(clone, contentItem.downloads);
         $parent.append(clone);
         $.when.apply(null, promises).done(function () {
@@ -75,6 +80,19 @@ var contentBuilder = function () {
         });
         return promises;
     }
+
+    var addResourceSection = function (itemClone, resources) {
+        var resourceClone = null;
+        $.each(resources, function (index, resource) {
+            resourceClone = $templateResource.prop("content").cloneNode(isDeepCopy);
+            resourceClone.querySelector("a").setAttribute("href", resource.resource);
+            resourceClone.querySelector("a").innerText = resource.title;
+            itemClone.querySelector(selectorResourceContainer).append(resourceClone);
+        });
+        if (resources.length <= 0) {
+            $(itemClone.querySelector(selectorResourceContainer)).hide();
+        }
+    };
 
     var addDownloadSection = function (itemClone, downloads) {
         var downloadClone = null;
@@ -118,6 +136,12 @@ var contentBuilder = function () {
         setItemTemplate: setTemplate,
         setItemImageContainerSelector: setImageContainerSelector,
         setItemImageTemplate: setImageTemplate,
+        setItemResourceContainerSelector: function (selector) {
+            selectorResourceContainer = selector;
+        },
+        setItemResourceTemplate: function($template) {
+            $templateResource = $template;
+        },
         setItemDownloadContainerSelector: setDownloadContainerSelector,
         setItemDownloadTemplate: setDownloadTemplate,
         setItemParent: setParent
@@ -163,6 +187,12 @@ var dataAccess = function () {
                 $.each(item.images, function (index, image) {
                     contentItem.images.push("./data/content/image/" + image);
                 });
+                $.each(item.resources, function (index, link) {
+                    resource = new dataAccess.Resource();
+                    resource.title = link.title;
+                    resource.resource = link.resource;
+                    contentItem.resources.push(resource);
+                });
                 $.each(item.downloads, function (index, download) {
                     resource = new dataAccess.Resource();
                     resource.title = download.title;
@@ -183,6 +213,7 @@ var dataAccess = function () {
         this.title = "";
         this.description = "";
         this.images = [];
+        this.resources = [];
         this.downloads = [];
     };
 

@@ -5,6 +5,16 @@
     "checkerboard.png",
     "checkerboard-wide.png"
   ],
+  "resources": [
+    {
+      "title": "Test Link To Site",
+      "resource": "#"
+    },
+    {
+      "title": "Link",
+      "resource": "#"
+    }
+  ],
   "downloads": [
     {
       "title": "Checkerboard image",

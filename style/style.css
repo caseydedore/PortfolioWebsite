@@ -104,11 +104,11 @@ hr {
     border:3px dashed greenyellow;
 }
 
-.container-content-download {
+.container-content-download, .container-content-resource {
     margin-bottom:10px;
 }
 
-.container-content-download * {
+.container-content-download *, .container-content-resource * {
     display:inline;
 }
 
