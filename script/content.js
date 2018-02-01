@@ -176,35 +176,45 @@ var dataAccess = function () {
         var contentItem = null;
         var resource = null;
         $.each(list, function (index, file) {
-            var $ajaxPromise = $.Deferred();
-            promises.push($ajaxPromise.promise());
-            $.ajax({
-                url: "./data/content/" + file
-            }).done(function (item) {
-                contentItem = new dataAccess.ContentItem();
-                contentItem.title = item.title;
-                contentItem.description = item.description;
-                $.each(item.images, function (index, image) {
-                    contentItem.images.push("./data/content/image/" + image);
-                });
-                $.each(item.resources, function (index, link) {
-                    resource = new dataAccess.Resource();
-                    resource.title = link.title;
-                    resource.resource = link.resource;
-                    contentItem.resources.push(resource);
-                });
-                $.each(item.downloads, function (index, download) {
-                    resource = new dataAccess.Resource();
-                    resource.title = download.title;
-                    resource.resource = "./data/content/download/" + download.resource;
-                    contentItem.downloads.push(resource);
-                });
-                contentItems.push(contentItem);
-                $ajaxPromise.resolve();
-            });
+            var $ajaxPromise = null;
+            contentItem = new dataAccess.ContentItem();
+            contentItem.position = index;
+            contentItems.push(contentItem);
+            $ajaxPromise = populateContentItemWithAjaxDataAsync(contentItem, file);
+            promises.push($ajaxPromise);
         });
         $.when.apply(null, promises).done(function () {
+            contentItems.sort(function (first, second) {
+                first.position - second.position;
+            });
             $promise.resolve(contentItems);
+        });
+        return $promise.promise();
+    }
+
+    var populateContentItemWithAjaxDataAsync = function (contentItem, contentDataName) {
+        var $promise = $.Deferred();
+        $.ajax({
+            url: "./data/content/" + contentDataName
+        }).done(function (item) {
+            contentItem.title = item.title;
+            contentItem.description = item.description;
+            $.each(item.images, function (index, image) {
+                contentItem.images.push("./data/content/image/" + image);
+            });
+            $.each(item.resources, function (index, link) {
+                resource = new dataAccess.Resource();
+                resource.title = link.title;
+                resource.resource = link.resource;
+                contentItem.resources.push(resource);
+            });
+            $.each(item.downloads, function (index, download) {
+                resource = new dataAccess.Resource();
+                resource.title = download.title;
+                resource.resource = "./data/content/download/" + download.resource;
+                contentItem.downloads.push(resource);
+            });
+            $promise.resolve();
         });
         return $promise.promise();
     }
@@ -215,6 +225,7 @@ var dataAccess = function () {
         this.images = [];
         this.resources = [];
         this.downloads = [];
+        this.position = 0;
     };
 
     var list = function () {
