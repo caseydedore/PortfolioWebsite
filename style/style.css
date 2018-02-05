@@ -1,7 +1,6 @@
 
 html {
     background-color:#1a1a1b;
-    overflow:hidden;
     height:100%;
 }
 
@@ -12,16 +11,18 @@ body {
     width:80%;
     min-width:500px;
     max-width:1600px;
-    height:100%;
     margin:auto;
     margin-top:0px;
-    overflow-y:hidden;
     position:relative;
 }
 
 #container-top {
-    height:50px;
-    margin-left:5px;
+    position:fixed;
+    top:0px;
+    width:80%;
+    background-color:#242325;
+    z-index:2;
+    display:inline-block;
 }
 
 #container-middle {
@@ -36,12 +37,18 @@ body {
 }
 
 #container-bottom {
-    position:absolute;
+    position:fixed;
     bottom:0px;
     height:50px;
+    width:80%;
     font-size:6pt;
     padding-bottom:10px;
-    margin-left:5px;
+    background-color:#242325;
+    z-index:2;
+}
+
+.header {
+    margin-top:82px;
 }
 
 .header-title {
@@ -77,8 +84,11 @@ a:hover {
 hr {
     border:none;
     border-top:3px dashed white;
-    height:6px;
     margin:0px;
+}
+
+.content {
+    margin-bottom:62px;
 }
 
 .content-item {
@@ -88,9 +98,7 @@ hr {
 }
 
 .content-image {
-    min-width:250px;
     max-width:30%;
-    margin:10px;
     margin-top:0px;
     margin-bottom:20px;
     display:inline-block;
